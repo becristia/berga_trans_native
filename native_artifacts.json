@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 2,
+  "release": "native-v0.1.0-rc.2",
+  "nativeAbiVersion": 2,
+  "buildIdentitySha256": "ba8787704eff5265646967f953668a31282d2f8bc18a4f9b14d68f316f444a76",
+  "correspondingSources": [
+    {
+      "id": "bergamot-mpl-source",
+      "fileName": "berga_trans_dash-native-v0.1.0-rc.2-mpl-source.tar.gz",
+      "url": "https://github.com/becristia/berga_trans_native/releases/download/native-v0.1.0-rc.2/berga_trans_dash-native-v0.1.0-rc.2-mpl-source.tar.gz",
+      "size": 26024877,
+      "sha256": "9ca7ddf569527b22a6d3b9de5e0933fa7d6559185d93b9e426cfbe333f6e2527",
+      "license": "MPL-2.0"
+    }
+  ],
+  "artifacts": [
+    {
+      "artifactId": "de8c7d45a253da65fe0ab6ac443bb92033b5d3d9",
+      "buildId": "de8c7d45a253da65fe0ab6ac443bb92033b5d3d9",
+      "os": "android",
+      "architecture": "arm64",
+      "environment": "android",
+      "fileName": "libberga_trans_dash-android-arm64.so",
+      "downloadSources": [
+        {
+          "url": "https://github.com/becristia/berga_trans_native/releases/download/native-v0.1.0-rc.2/libberga_trans_dash-android-arm64.so",
+          "allowedRedirectHosts": [
+            "release-assets.githubusercontent.com"
+          ]
+        }
+      ],
+      "correspondingSourceIds": [
+        "bergamot-mpl-source"
+      ],
+      "size": 5019560,
+      "sha256": "0b24aebf5eb2c0c0b242766e1ca3915c3e9bb79640876ff547a62af81fedfdc3"
+    },
+    {
+      "artifactId": "4FCC5CBE-414C-367F-BDDB-EAA9B5B7D01B",
+      "buildId": "4FCC5CBE-414C-367F-BDDB-EAA9B5B7D01B",
+      "os": "ios",
+      "architecture": "arm64",
+      "environment": "iphoneos",
+      "fileName": "libberga_trans_dash-ios-device-arm64.dylib",
+      "downloadSources": [
+        {
+          "url": "https://github.com/becristia/berga_trans_native/releases/download/native-v0.1.0-rc.2/libberga_trans_dash-ios-device-arm64.dylib",
+          "allowedRedirectHosts": [
+            "release-assets.githubusercontent.com"
+          ]
+        }
+      ],
+      "correspondingSourceIds": [
+        "bergamot-mpl-source"
+      ],
+      "size": 4226056,
+      "sha256": "9de7de106366f92f9400d1b5ebb55c51bd3e886695f15ab5a2bd4fc56183718f"
+    }
+  ]
+}

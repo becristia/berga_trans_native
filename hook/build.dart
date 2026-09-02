@@ -39,8 +39,9 @@ void main(List<String> args) async {
     final manifestFile = File.fromUri(manifestUri);
     if (!await manifestFile.exists()) {
       throw StateError(
-        'BergaTransDash Native ABI 2 has not been published. '
-        'Provide $_manifestDefine for a local verified build.',
+        'BergaTransDash Native Artifact Manifest was not found at '
+        '${manifestFile.path}. Provide $_manifestDefine only for a local '
+        'verified build.',
       );
     }
     output.dependencies.add(manifestUri);

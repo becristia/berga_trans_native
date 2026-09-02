@@ -34,19 +34,33 @@ void main() {
     await expectLater(fixture.runAndroidX64(), throwsUnsupportedError);
   });
 
-  test('Build Hook reports that the ABI 2 release is not published', () async {
+  test('Build Hook reports a missing configured Artifact Manifest', () async {
+    final missingManifest = Directory.systemTemp.uri
+        .resolve(
+          'berga_trans_dash_native_missing_'
+          '${DateTime.now().microsecondsSinceEpoch}.json',
+        )
+        .toFilePath();
     await expectLater(
       testCodeBuildHook(
         mainMethod: build_hook.main,
         targetOS: OS.android,
         targetArchitecture: Architecture.arm64,
+        userDefines: PackageUserDefines(
+          workspacePubspec: PackageUserDefinesSource(
+            defines: {
+              'berga_trans_dash_native_artifact_manifest': missingManifest,
+            },
+            basePath: Directory.current.uri,
+          ),
+        ),
         check: (_, _) {},
       ),
       throwsA(
         isA<StateError>().having(
           (error) => error.message,
           'message',
-          contains('ABI 2 has not been published'),
+          contains('Artifact Manifest was not found'),
         ),
       ),
     );

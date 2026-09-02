@@ -12,5 +12,11 @@ uploads only a private GitHub Actions artifact with 14-day retention. It does
 not create a tag, GitHub Release, production Artifact Manifest, or pub.dev
 publication.
 
+Production Native assets are an explicit release operation, not a CI side
+effect. The `native-v0.1.0-rc.2` GitHub pre-release contains the checked-in
+Manifest, both supported ARM64 binaries, and their MPL corresponding-source
+archive. Consumers use the immutable Git tag; pub.dev publication remains
+disabled.
+
 All third-party actions are pinned to complete commit SHAs. Both workflows use
 read-only repository permissions and do not require repository secrets.

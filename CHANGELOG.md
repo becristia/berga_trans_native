@@ -1,7 +1,9 @@
 # Changelog
 
-## Next - Unreleased
+## 0.1.0-rc.2 - 2026-09-02
 
+- Publish the production ABI 2 Artifact Manifest and GitHub pre-release assets
+  for Android ARM64 and iOS Device ARM64.
 - Add pinned continuous integration and a manual, non-publishing package
   candidate staging workflow.
 

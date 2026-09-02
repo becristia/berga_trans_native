@@ -33,8 +33,11 @@ language-profile selection.
   (Android ARM64 and iOS Device ARM64) and fails closed on extra/missing
   targets, unsupported ABI/target, unsafe URL, size mismatch, or SHA-256
   mismatch.
-- Until an authorized RC2 publication exists, `publish_to: none` remains set
-  and no production `native_artifacts.json` is checked in.
+- RC releases are distributed through immutable Git tags and GitHub
+  pre-releases. The checked-in production `native_artifacts.json` must point
+  to the matching release assets and remain covered by manifest tests.
+- Keep `publish_to: none` until a separate pub.dev publication is deliberately
+  configured; Git consumers must pin an immutable release tag.
 
 ## Engineering Discipline
 
