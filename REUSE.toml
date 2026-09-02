@@ -1,0 +1,26 @@
+version = 1
+
+[[annotations]]
+path = [
+  "*.md",
+  ".gitignore",
+  ".pubignore",
+  "analysis_options.yaml",
+  "assets/**/*",
+  "hook/**/*",
+  "lib/**/*",
+  "native/patches/**/*",
+  "pubspec.yaml",
+  "src/**/*",
+  "test/**/*",
+  "tool/**/*",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 BergaTransDash contributors"
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = ["LICENSES/**/*", "THIRD_PARTY_LICENSES/**/*"]
+precedence = "override"
+SPDX-FileCopyrightText = "NOASSERTION"
+SPDX-License-Identifier = "LicenseRef-ThirdParty-License-Text"

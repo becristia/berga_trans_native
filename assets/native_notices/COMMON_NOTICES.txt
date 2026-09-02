@@ -1,0 +1,18 @@
+BergaTransDash native third-party notices
+=========================================
+
+The translation-only native runtime contains Mozilla Translations/Bergamot
+inference, Marian NMT, and their pinned transitive dependencies. Exact source
+revisions, patches, hashes, license texts, SBOMs, and corresponding-source
+archives are published with the Native Release and pinned by
+native_artifacts.json.
+
+Mozilla Translations and Bergamot inference
+  Source: https://github.com/mozilla/translations
+  Revision: c75e5ba39856fe765850172f20f6177c5e7562e6
+  License: MPL-2.0
+
+Marian NMT and the remaining pinned native dependencies retain the individual
+license and attribution texts bundled under THIRD_PARTY_LICENSES/. The complete
+union notice remains available in the private build source as
+THIRD_PARTY_NOTICES; it is not copied into applications by the Build Hook.

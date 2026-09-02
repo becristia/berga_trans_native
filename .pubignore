@@ -1,0 +1,13 @@
+.DS_Store
+.dart_tool/
+.git/
+.github/
+.idea/
+AGENTS.md
+build/
+coverage/
+ignore/
+test/
+third_party/
+native/artifacts/
+native/build/
