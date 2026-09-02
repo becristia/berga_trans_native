@@ -17,3 +17,9 @@ Tests inject a local schema-2 manifest through
 
 Supported release targets are Android ARM64 and iOS Device ARM64. iOS
 Simulator is rejected.
+
+## Continuous integration
+
+Pull requests and `main` run analysis, tests, the public-boundary gate, and a
+package dry-run. Manual candidate staging creates an Actions artifact for
+review without publishing it. See [CI and candidate staging](compliance/CI_CD.md).

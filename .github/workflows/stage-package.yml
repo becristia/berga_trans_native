@@ -1,0 +1,72 @@
+# SPDX-License-Identifier: MPL-2.0
+
+name: Stage package candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage-package-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  stage:
+    name: Verify and archive candidate
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out package
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: 3.41.0
+          channel: stable
+          cache: true
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Verify package
+        run: |
+          flutter analyze
+          flutter test
+          dart pub publish --dry-run
+
+      - name: Build deterministic review archive
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^version: //p' pubspec.yaml)"
+          if [[ ! "$version" =~ ^[A-Za-z0-9.+_-]+$ ]]; then
+            echo "Unsafe or missing package version: $version" >&2
+            exit 1
+          fi
+          mkdir -p .dart_tool/staging
+          archive="berga_trans_dash_native-$version.tar.gz"
+          git archive \
+            --format=tar \
+            --prefix="berga_trans_dash_native-$version/" \
+            HEAD | gzip -n > ".dart_tool/staging/$archive"
+          (
+            cd .dart_tool/staging
+            sha256sum "$archive" > "$archive.sha256"
+          )
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Upload review archive
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: berga-trans-dash-native-${{ steps.package.outputs.version }}
+          path: |
+            .dart_tool/staging/*.tar.gz
+            .dart_tool/staging/*.sha256
+          if-no-files-found: error
+          retention-days: 14

@@ -1,5 +1,10 @@
 # Changelog
 
+## Next - Unreleased
+
+- Add pinned continuous integration and a manual, non-publishing package
+  candidate staging workflow.
+
 ## 0.1.0-dev.1
 
 - Split the public Native Assets loader from the proprietary translation SDK.
