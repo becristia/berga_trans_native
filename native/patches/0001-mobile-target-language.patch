@@ -1,0 +1,266 @@
+berga_trans_dash mobile target-language and toolchain compatibility patch.
+
+Upstream base: mozilla/translations c75e5ba39856fe765850172f20f6177c5e7562e6.
+The TargetArch, zlib, Pathie, Faiss, and Marian CMake changes are derived in
+part from the MPL-2.0 patch in jesses2025smith/bergamot_translator commit
+32b33b167c321f934e42f9482c3943a6c98c19da. The original patch is pinned by
+path and SHA-256 in native_dependencies.lock.json. Other upstream files retain
+their original MPL-2.0, MIT, BSD-2-Clause, or Zlib terms. This patch plainly
+marks the altered zlib source as required by its license.
+
+diff --git a/inference/src/translator/response_builder.h b/inference/src/translator/response_builder.h
+index f64939ab..34ef2ed7 100644
+--- a/inference/src/translator/response_builder.h
++++ b/inference/src/translator/response_builder.h
+@@ -23,7 +23,7 @@ namespace bergamot {
+ /// paragraph).
+ 
+ class ResponseBuilder {
+-#if defined(WASM)
++#if defined(WASM) || defined(OT_MOBILE)
+  public:
+   /// Registers the target language that the response text will be translated into.
+   /// For WASM builds that support CJK languages, this has an effect on the whitespace
+@@ -36,7 +36,7 @@ class ResponseBuilder {
+  private:
+   /// The target language that the response text will be translated into.
+   std::string targetLanguage_;
+-#endif // defined(WASM)
++#endif // defined(WASM) || defined(OT_MOBILE)
+ 
+  public:
+   /// @param [in] responseOptions: ResponseOptions, indicating what to include
+@@ -66,9 +66,9 @@ class ResponseBuilder {
+ 
+     // Move source_ into response.
+     response.source = std::move(source_);
+-#if defined(WASM)
++#if defined(WASM) || defined(OT_MOBILE)
+     response.target.registerTargetLanguage(targetLanguage_);
+-#endif // defined(WASM)
++#endif // defined(WASM) || defined(OT_MOBILE)
+ 
+     // Should be after source is set
+     buildTranslatedText(histories, response);
+diff --git a/inference/src/translator/translation_model.cpp b/inference/src/translator/translation_model.cpp
+index d447c510..a89d77b2 100644
+--- a/inference/src/translator/translation_model.cpp
++++ b/inference/src/translator/translation_model.cpp
+@@ -126,9 +126,9 @@ Ptr<Request> TranslationModel::makeRequest(size_t requestId, std::string &&sourc
+ 
+   textProcessor_.process(std::move(source), annotatedSource, segments);
+   ResponseBuilder responseBuilder(responseOptions, std::move(annotatedSource), vocabs_, callback, *qualityEstimator_);
+-#if defined(WASM)
++#if defined(WASM) || defined(OT_MOBILE)
+   responseBuilder.registerTargetLanguage(targetLanguage_);
+-#endif // defined(WASM)
++#endif // defined(WASM) || defined(OT_MOBILE)
+ 
+   Ptr<Request> request =
+       New<Request>(requestId, /*model=*/*this, std::move(segments), std::move(responseBuilder), cache);
+@@ -142,9 +142,9 @@ Ptr<Request> TranslationModel::makePivotRequest(size_t requestId, AnnotatedText
+ 
+   textProcessor_.processFromAnnotation(previousTarget, segments);
+   ResponseBuilder responseBuilder(responseOptions, std::move(previousTarget), vocabs_, callback, *qualityEstimator_);
+-#if defined(WASM)
++#if defined(WASM) || defined(OT_MOBILE)
+   responseBuilder.registerTargetLanguage(targetLanguage_);
+-#endif // defined(WASM)
++#endif // defined(WASM) || defined(OT_MOBILE)
+ 
+   Ptr<Request> request = New<Request>(requestId, *this, std::move(segments), std::move(responseBuilder), cache);
+   return request;
+diff --git a/inference/src/translator/translation_model.h b/inference/src/translator/translation_model.h
+index 19259e54..e251572b 100644
+--- a/inference/src/translator/translation_model.h
++++ b/inference/src/translator/translation_model.h
+@@ -97,23 +97,25 @@ class TranslationModel {
+   /// Returns a unique-identifier for the model.
+   size_t modelId() const { return modelId_; }
+ 
+-#if defined(WASM)
++#if defined(WASM) || defined(OT_MOBILE)
+  private:
+   /// The target language to be translated into.
+   std::string targetLanguage_;
+ 
+  public:
++#if defined(WASM)
+   /// Registers the source language that the text processor will use for sentence segmentation.
+   void registerSourceLanguage(const std::string& language) {
+     textProcessor_.registerSourceLanguage(language);
+   }
++#endif // defined(WASM)
+ 
+   /// Registers the target language that response-builders will use to determine how whitespace
+   /// should be pieced together in the translated text.
+   void registerTargetLanguage(const std::string& language) {
+     targetLanguage_ = language;
+   }
+-#endif // defined(WASM)
++#endif // defined(WASM) || defined(OT_MOBILE)
+ 
+  private:
+   size_t modelId_;
+diff --git a/inference/marian-fork/CMakeLists.txt b/inference/marian-fork/CMakeLists.txt
+index e22af91e..defd6e9b 100644
+--- a/inference/marian-fork/CMakeLists.txt
++++ b/inference/marian-fork/CMakeLists.txt
+@@ -195,8 +195,11 @@ include(GetVersionFromFile)
+ message(STATUS "Project name: ${PROJECT_NAME}")
+ message(STATUS "Project version: ${PROJECT_VERSION_STRING_FULL}")
+ 
+-execute_process(COMMAND git submodule update --init --recursive --no-fetch
+-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
++option(MARIAN_UPDATE_SUBMODULES "Update Marian git submodules while configuring" ON)
++if(MARIAN_UPDATE_SUBMODULES)
++  execute_process(COMMAND git submodule update --init --recursive --no-fetch
++                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
++endif()
+ 
+ # Note that with CMake MSVC build, the option CMAKE_BUILD_TYPE is automatically derived from the key
+ # 'configurationType' in CMakeSettings.json configurations
+diff --git a/inference/marian-fork/src/3rd_party/zlib/zutil.h b/inference/marian-fork/src/3rd_party/zlib/zutil.h
+index b079ea6a..eada78b1 100644
+--- a/inference/marian-fork/src/3rd_party/zlib/zutil.h
++++ b/inference/marian-fork/src/3rd_party/zlib/zutil.h
+@@ -130,7 +130,8 @@ extern z_const char * const z_errmsg[10]; /* indexed by 2-zlib_error */
+ #  endif
+ #endif
+ 
+-#if defined(MACOS) || defined(TARGET_OS_MAC)
++/* Modified by berga_trans_dash for modern Apple targets. */
++#if (defined(MACOS) || defined(TARGET_OS_MAC)) && !defined(__APPLE__)
+ #  define OS_CODE  7
+ #  ifndef Z_SOLO
+ #    if defined(__MWERKS__) && __dest_os != __be_os && __dest_os != __win32_os
+diff --git a/inference/marian-fork/src/3rd_party/ExceptionWithCallStack.cpp b/inference/marian-fork/src/3rd_party/ExceptionWithCallStack.cpp
+index 3ce38a2a..d05455cd 100644
+--- a/inference/marian-fork/src/3rd_party/ExceptionWithCallStack.cpp
++++ b/inference/marian-fork/src/3rd_party/ExceptionWithCallStack.cpp
+@@ -199,7 +199,7 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut,
+ 
+ #else // Linux
+ 
+-    unsigned int MAX_NUM_FRAMES = 1024;
++    const unsigned int MAX_NUM_FRAMES = 1024;
+     void* backtraceAddresses[MAX_NUM_FRAMES];
+     unsigned int numFrames = backtrace(backtraceAddresses, MAX_NUM_FRAMES);
+     char** symbolList = backtrace_symbols(backtraceAddresses, numFrames);
+@@ -232,7 +232,7 @@ static void CollectCallStack(size_t skipLevels, bool makeFunctionNamesStandOut,
+ 
+             // Mangled name is now in [beginName, beginOffset) and caller offset in [beginOffset, beginAddress).
+             int status = 0;
+-            unsigned int MAX_FUNCNAME_SIZE = 4096;
++            const unsigned int MAX_FUNCNAME_SIZE = 4096;
+             size_t funcNameSize = MAX_FUNCNAME_SIZE;
+             char funcName[MAX_FUNCNAME_SIZE]; // working buffer
+             const char* ret = abi::__cxa_demangle(beginName, funcName, &funcNameSize, &status);
+diff --git a/inference/marian-fork/src/3rd_party/pathie-cpp/src/path.cpp b/inference/marian-fork/src/3rd_party/pathie-cpp/src/path.cpp
+index e13d5cec..a9c69fca 100644
+--- a/inference/marian-fork/src/3rd_party/pathie-cpp/src/path.cpp
++++ b/inference/marian-fork/src/3rd_party/pathie-cpp/src/path.cpp
+@@ -61,7 +61,9 @@
+ #include <sys/types.h>
+ #include <sys/param.h> // defines "BSD" macro on BSD systems
+ #include <pwd.h>
++#if !defined(__ANDROID__) || __ANDROID_API__ >= 28
+ #include <glob.h>
++#endif
+ #include <fnmatch.h>
+ 
+ #else
+@@ -3172,7 +3174,7 @@ using namespace std;
+ ///
+ std::vector<Path> Path::glob(const std::string& pattern, int flags /* = 0 */)
+ {
+-#if defined(_PATHIE_UNIX)
++#if defined(_PATHIE_UNIX) && (!defined(__ANDROID__) || __ANDROID_API__ >= 28)
+   std::string nstr = utf8_to_filename(pattern);
+   glob_t globinfo;
+   int result = ::glob(nstr.c_str(), flags, NULL, &globinfo);
+@@ -3193,6 +3195,10 @@ std::vector<Path> Path::glob(const std::string& pattern, int flags /* = 0 */)
+   else {
+     throw(GlobError(result));
+   }
++#elif defined(__ANDROID__)
++  (void)pattern;
++  (void)flags;
++  return std::vector<Path>();
+ #elif defined(_WIN32)
+   std::vector<Path> results;
+   std::wstring utf16_pattern = utf8_to_utf16(pattern);
+diff --git a/inference/marian-fork/src/3rd_party/pathie-cpp/src/pathie.cpp b/inference/marian-fork/src/3rd_party/pathie-cpp/src/pathie.cpp
+index d8e567e1..f880eaf6 100644
+--- a/inference/marian-fork/src/3rd_party/pathie-cpp/src/pathie.cpp
++++ b/inference/marian-fork/src/3rd_party/pathie-cpp/src/pathie.cpp
+@@ -82,8 +82,10 @@ std::wstring Pathie::utf8_to_utf16(std::string str)
+ #include <cstring>
+ #include <cstdlib>
+ #include <errno.h>
++#if !defined(__ANDROID__) || __ANDROID_API__ >= 28
+ #include <iconv.h>
+ #include <langinfo.h>
++#endif
+ #include <sys/param.h> // defines "BSD" macro on BSD systems
+ 
+ /* iconv() function family is available on every POSIX-conformant
+@@ -111,6 +113,11 @@ std::wstring Pathie::utf8_to_utf16(std::string str)
+  */
+ std::string Pathie::convert_encodings(const char* from_encoding, const char* to_encoding, const std::string& string)
+ {
++#if defined(__ANDROID__) && __ANDROID_API__ < 28
++  (void)from_encoding;
++  (void)to_encoding;
++  return string;
++#else
+   size_t input_length = string.length();
+ 
+   // We need a C string working copy that isn’t const
+@@ -173,6 +180,7 @@ std::string Pathie::convert_encodings(const char* from_encoding, const char* to_
+   free(outbuf);
+ 
+   return result;
++#endif
+ }
+ 
+ /**
+diff --git a/inference/marian-fork/src/3rd_party/faiss/VectorTransform.cpp b/inference/marian-fork/src/3rd_party/faiss/VectorTransform.cpp
+index a26c2b4d..b6f4b554 100644
+--- a/inference/marian-fork/src/3rd_party/faiss/VectorTransform.cpp
++++ b/inference/marian-fork/src/3rd_party/faiss/VectorTransform.cpp
+@@ -14,6 +14,10 @@
+ #include <cstring>
+ #include <memory>
+ 
++#ifdef __SSE__
++#include <immintrin.h>
++#endif
++
+ #include <faiss/utils/random.h>
+ #include "common/logging.h"
+ 
+diff --git a/inference/marian-fork/cmake/TargetArch.cmake b/inference/marian-fork/cmake/TargetArch.cmake
+index f653e3e2..85aeb6c3 100644
+--- a/inference/marian-fork/cmake/TargetArch.cmake
++++ b/inference/marian-fork/cmake/TargetArch.cmake
+@@ -79,6 +79,8 @@ function(target_architecture output_var)
+                 set(osx_arch_i386 TRUE)
+             elseif("${osx_arch}" STREQUAL "x86_64")
+                 set(osx_arch_x86_64 TRUE)
++            elseif("${osx_arch}" STREQUAL "arm64" OR "${osx_arch}" STREQUAL "arm64e")
++                set(osx_arch_arm64 TRUE)
+             elseif("${osx_arch}" STREQUAL "ppc64" AND ppc_support)
+                 set(osx_arch_ppc64 TRUE)
+             else()
+@@ -99,6 +101,10 @@ function(target_architecture output_var)
+             list(APPEND ARCH x86_64)
+         endif()
+ 
++        if(osx_arch_arm64)
++           list(APPEND ARCH arm64)
++        endif()
++
+         if(osx_arch_ppc64)
+             list(APPEND ARCH ppc64)
+         endif()
