@@ -1,5 +1,12 @@
 # Changelog
 
+## Next - Unreleased
+
+- Isolate concurrent Native Artifact downloads in per-invocation temporary
+  directories and avoid retrying integrity or redirect-trust failures.
+- Make public patch provenance and third-party notice references independently
+  verifiable without the private SDK repository.
+
 ## 0.1.0-rc.2 - 2026-09-02
 
 - Publish the production ABI 2 Artifact Manifest and GitHub pre-release assets

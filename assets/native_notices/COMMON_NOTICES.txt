@@ -13,6 +13,6 @@ Mozilla Translations and Bergamot inference
   License: MPL-2.0
 
 Marian NMT and the remaining pinned native dependencies retain the individual
-license and attribution texts bundled under THIRD_PARTY_LICENSES/. The complete
-union notice remains available in the private build source as
-THIRD_PARTY_NOTICES; it is not copied into applications by the Build Hook.
+license and attribution texts bundled under THIRD_PARTY_LICENSES/ in the public
+Native package. The consolidated private release-input notice is not copied
+into applications by the Build Hook.

@@ -24,10 +24,12 @@ Future<File> ensureNativeArtifact({
     );
   }
   if (await isNativeArtifactValid(destination, artifact)) return destination;
-  if (await destination.exists()) await destination.delete();
 
   await destination.parent.create(recursive: true);
-  final temporary = File('${destination.path}.part');
+  final temporaryDirectory = await destination.parent.createTemp(
+    '.berga-trans-dash-native-part-',
+  );
+  final temporary = File('${temporaryDirectory.path}/artifact');
   final httpClient = client ?? (HttpClient()..connectionTimeout = connectionTimeout);
   final ownsClient = client == null;
   try {
@@ -42,9 +44,15 @@ Future<File> ensureNativeArtifact({
             responseTimeout: responseTimeout,
           );
           if (!await isNativeArtifactValid(temporary, artifact)) {
-            throw StateError('Native artifact checksum mismatch.');
+            throw const _NativeArtifactIntegrityException(
+              'Native artifact checksum mismatch.',
+            );
           }
-          await temporary.rename(destination.path);
+          await _promoteTemporaryArtifact(
+            temporary: temporary,
+            destination: destination,
+            artifact: artifact,
+          );
           return destination;
         } catch (error) {
           if (await temporary.exists()) await temporary.delete();
@@ -59,7 +67,28 @@ Future<File> ensureNativeArtifact({
     );
   } finally {
     if (ownsClient) httpClient.close(force: true);
-    if (await temporary.exists()) await temporary.delete();
+    if (await temporaryDirectory.exists()) {
+      await temporaryDirectory.delete(recursive: true);
+    }
+  }
+}
+
+Future<void> _promoteTemporaryArtifact({
+  required File temporary,
+  required File destination,
+  required NativeArtifact artifact,
+}) async {
+  try {
+    await temporary.rename(destination.path);
+  } on FileSystemException {
+    if (await isNativeArtifactValid(destination, artifact)) return;
+    if (!Platform.isWindows) rethrow;
+    if (await destination.exists()) await destination.delete();
+    try {
+      await temporary.rename(destination.path);
+    } on FileSystemException {
+      if (!await isNativeArtifactValid(destination, artifact)) rethrow;
+    }
   }
 }
 
@@ -118,7 +147,9 @@ Future<void> _downloadFromSource({
       await for (final chunk in response.timeout(responseTimeout)) {
         receivedBytes += chunk.length;
         if (receivedBytes > artifact.size) {
-          throw StateError('Native artifact exceeded its declared size.');
+          throw const _NativeArtifactIntegrityException(
+            'Native artifact exceeded its declared size.',
+          );
         }
         sink.add(chunk);
       }
@@ -126,7 +157,9 @@ Future<void> _downloadFromSource({
       await sink.close();
     }
     if (receivedBytes != artifact.size) {
-      throw StateError('Native artifact size mismatch.');
+      throw const _NativeArtifactIntegrityException(
+        'Native artifact size mismatch.',
+      );
     }
     return;
   }
@@ -143,14 +176,14 @@ void _validateDownloadUri(Uri uri, Set<String> allowedHosts) {
       uri.userInfo.isNotEmpty ||
       uri.hasFragment ||
       !allowedHosts.contains(uri.host.toLowerCase())) {
-    throw const HttpException(
+    throw const _NativeArtifactTrustException(
       'Native artifact redirected to an untrusted URL.',
     );
   }
 }
 
 bool _isRetryable(Object error) => switch (error) {
-  TimeoutException() || SocketException() || StateError() || HttpException() =>
+  TimeoutException() || SocketException() || HttpException() =>
     true,
   _NativeArtifactHttpException(:final statusCode) =>
     statusCode == HttpStatus.requestTimeout ||
@@ -163,6 +196,24 @@ final class _NativeArtifactHttpException implements Exception {
   const _NativeArtifactHttpException(this.statusCode);
 
   final int statusCode;
+}
+
+final class _NativeArtifactIntegrityException implements Exception {
+  const _NativeArtifactIntegrityException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
+final class _NativeArtifactTrustException implements Exception {
+  const _NativeArtifactTrustException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }
 
 Future<bool> isNativeArtifactValid(

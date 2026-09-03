@@ -115,7 +115,35 @@ void main() {
 
     expect(await destination.exists(), isFalse);
     expect(await File('${destination.path}.part').exists(), isFalse);
-    expect(server.requests, 2);
+    expect(server.requests, 1);
+  });
+
+  test('concurrent cache fills use independent temporary files', () async {
+    final bytes = utf8.encode('concurrent native artifact');
+    final server = await _ArtifactServer.start(
+      bytes: bytes,
+      responseDelay: const Duration(milliseconds: 20),
+    );
+    addTearDown(server.close);
+    final artifact = _artifact(server.uri, bytes);
+    final destination = File('${root.path}/cache/library.so');
+
+    final results = await Future.wait([
+      ensureNativeArtifact(artifact: artifact, destination: destination),
+      ensureNativeArtifact(artifact: artifact, destination: destination),
+    ]);
+
+    expect(results.map((file) => file.path), everyElement(destination.path));
+    expect(await destination.readAsBytes(), bytes);
+    expect(
+      destination.parent
+          .listSync(followLinks: false)
+          .where(
+            (entry) =>
+                entry.path.contains('.berga-trans-dash-native-part-'),
+          ),
+      isEmpty,
+    );
   });
 
   test('reports an HTTP failure', () async {
@@ -223,12 +251,12 @@ void main() {
       ensureNativeArtifact(
         artifact: _artifact(sourceServer.uri, bytes),
         destination: File('${root.path}/cache/library.so'),
-        attemptsPerSource: 1,
       ),
       throwsA(isA<StateError>()),
     );
 
     expect(destinationServer.requests, 0);
+    expect(sourceServer.requests, 1);
   });
 }
 

@@ -3,10 +3,12 @@ berga_trans_dash mobile target-language and toolchain compatibility patch.
 Upstream base: mozilla/translations c75e5ba39856fe765850172f20f6177c5e7562e6.
 The TargetArch, zlib, Pathie, Faiss, and Marian CMake changes are derived in
 part from the MPL-2.0 patch in jesses2025smith/bergamot_translator commit
-32b33b167c321f934e42f9482c3943a6c98c19da. The original patch is pinned by
-path and SHA-256 in native_dependencies.lock.json. Other upstream files retain
-their original MPL-2.0, MIT, BSD-2-Clause, or Zlib terms. This patch plainly
-marks the altered zlib source as required by its license.
+32b33b167c321f934e42f9482c3943a6c98c19da at
+third_party/patches/00-bergamot-translator.patch (SHA-256
+48dab92e7c77ad62e6b6673e1bf88a67142a8302835d82854fb7b8a64c6d1850).
+Other upstream files retain their original MPL-2.0, MIT, BSD-2-Clause, or Zlib
+terms. This patch plainly marks the altered zlib source as required by its
+license.
 
 diff --git a/inference/src/translator/response_builder.h b/inference/src/translator/response_builder.h
 index f64939ab..34ef2ed7 100644
