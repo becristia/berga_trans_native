@@ -56,7 +56,8 @@ void main(List<String> args) async {
       requiredNativeAbiVersion: _requiredNativeAbiVersion,
     );
     final cacheUri = input.outputDirectoryShared.resolve(
-      'berga_trans_dash_native/${artifact.sha256}/${artifact.fileName}',
+      'berga_trans_dash_native/${manifest.buildIdentitySha256}/'
+      '${artifact.sha256}/${artifact.fileName}',
     );
     final cachedArtifact = await ensureNativeArtifact(
       artifact: artifact,

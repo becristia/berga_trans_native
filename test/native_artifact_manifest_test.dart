@@ -7,19 +7,19 @@ import 'package:berga_trans_dash_native/src/hook/native_artifact_manifest.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('checked-in RC2 Manifest matches the public release contract', () {
+  test('checked-in RC1 Manifest matches the public release contract', () {
     final file = File('native_artifacts.json');
     expect(file.existsSync(), isTrue);
 
     final manifest = NativeArtifactManifest.parse(file.readAsStringSync());
-    expect(manifest.release, 'native-v0.1.0-rc.2');
+    expect(manifest.release, 'native-v0.1.0-rc.1');
     expect(manifest.nativeAbiVersion, 2);
     expect(manifest.artifacts, hasLength(2));
     expect(manifest.correspondingSources, hasLength(1));
 
     final releaseBase =
         'https://github.com/becristia/berga_trans_native/releases/download/'
-        'native-v0.1.0-rc.2/';
+        'native-v0.1.0-rc.1/';
     final source = manifest.correspondingSources.single;
     expect(source.url.toString(), '$releaseBase${source.fileName}');
     for (final artifact in manifest.artifacts) {
@@ -183,7 +183,7 @@ NativeArtifactManifest _parseChanged(
 
 Map<String, Object?> _manifest() => {
   'schemaVersion': 2,
-  'release': 'native-v0.1.0-rc.2-test',
+  'release': 'native-v0.1.0-rc.1-test',
   'nativeAbiVersion': 2,
   'buildIdentitySha256': List.filled(64, 'a').join(),
   'correspondingSources': [

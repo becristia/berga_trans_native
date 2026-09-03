@@ -99,7 +99,7 @@ final class _HookFixture {
     await manifest.writeAsString(
       jsonEncode({
         'schemaVersion': 2,
-        'release': 'native-v0.1.0-rc.2-test',
+        'release': 'native-v0.1.0-rc.1-test',
         'nativeAbiVersion': 2,
         'buildIdentitySha256': List.filled(64, 'a').join(),
         'correspondingSources': [
@@ -177,9 +177,10 @@ final class _HookFixture {
       expect(asset.id, bergaTransDashNativeAssetId);
       expect(asset.file!.pathSegments.last, 'libberga_trans_dash.so');
       expect(await File.fromUri(asset.file!).readAsBytes(), bytes);
+      final buildIdentity = List.filled(64, 'a').join();
       final cachedArtifact = File.fromUri(
         input.outputDirectoryShared.resolve(
-          'berga_trans_dash_native/${sha256.convert(bytes)}/'
+          'berga_trans_dash_native/$buildIdentity/${sha256.convert(bytes)}/'
           'libberga_trans_dash-android-arm64.so',
         ),
       );

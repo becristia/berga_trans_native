@@ -13,7 +13,7 @@ not create a tag, GitHub Release, production Artifact Manifest, or pub.dev
 publication.
 
 Production Native assets are an explicit release operation, not a CI side
-effect. The `native-v0.1.0-rc.2` GitHub pre-release contains the checked-in
+effect. The `native-v0.1.0-rc.1` GitHub pre-release contains the checked-in
 Manifest, both supported ARM64 binaries, and their MPL corresponding-source
 archive. Consumers use the immutable Git tag; pub.dev publication remains
 disabled.

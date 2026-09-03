@@ -10,7 +10,7 @@ identification, or first-party native implementation.
 
 ## RC release
 
-Native ABI 2 is published as the `native-v0.1.0-rc.2` GitHub pre-release. The
+Native ABI 2 is published as the `native-v0.1.0-rc.1` GitHub pre-release. The
 checked-in `native_artifacts.json` pins its Android ARM64 and iOS Device ARM64
 binaries, MPL-2.0 corresponding source, byte sizes, and SHA-256 digests.
 
@@ -22,7 +22,7 @@ dependencies:
   berga_trans_dash_native:
     git:
       url: https://github.com/becristia/berga_trans_native.git
-      ref: native-v0.1.0-rc.2
+      ref: native-v0.1.0-rc.1
 ```
 
 Local verified builds can still override the manifest through
